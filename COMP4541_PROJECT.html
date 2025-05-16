@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decentralized File Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.4/dist/web3.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4">
+        <div class="flex items-center justify-center mb-4">
+            <h1 class="text-3xl font-bold text-center">Decentralized File Management</h1>
+            <span id="fileCount" class="ml-4 text-xl text-gray-700"></span>
+        </div>
+        
+        <!-- Wallet Connection -->
+        <div class="mb-4">
+            <button id="connectWallet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Connect MetaMask</button>
+            <p id="accountStatus" class="mt-2 text-gray-700"></p>
+        </div>
+
+        <!-- Create File -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">Create File</h2>
+            <input id="fileName" type="text" placeholder="File Name" class="border p-2 w-full mb-2">
+            <input id="fileHash" type="text" placeholder="IPFS Hash" class="border p-2 w-full mb-2">
+            <input id="commitMessage" type="text" placeholder="Commit Message" class="border p-2 w-full mb-2">
+            <input id="fileSize" type="number" placeholder="File Size (bytes)" class="border p-2 w-full mb-2">
+            <button id="createFile" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create File</button>
+        </div>
+
+        <!-- Add Version -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">Add Version</h2>
+            <input id="versionFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <input id="versionHash" type="text" placeholder="IPFS Hash" class="border p-2 w-full mb-2">
+            <input id="versionCommitMessage" type="text" placeholder="Commit Message" class="border p-2 w-full mb-2">
+            <input id="versionFileSize" type="number" placeholder="File Size (bytes)" class="border p-2 w-full mb-2">
+            <button id="addVersion" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add Version</button>
+        </div>
+
+        <!-- Manage Collaborators -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">Manage Collaborators</h2>
+            <input id="collabFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <input id="collaboratorAddress" type="text" placeholder="Collaborator Address" class="border p-2 w-full mb-2">
+            <button id="addCollaborator" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Add Collaborator</button>
+            <button id="removeCollaborator" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mr-2">Remove Collaborator</button>
+            <button id="leaveCollaborator" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Leave as Collaborator</button>
+        </div>
+
+        <!-- Ownership Transfer -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">Ownership Transfer</h2>
+            <input id="transferFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <input id="newOwnerAddress" type="text" placeholder="New Owner Address" class="border p-2 w-full mb-2">
+            <button id="requestTransfer" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">Request Transfer</button>
+            <button id="acceptTransfer" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2">Accept Transfer</button>
+            <button id="cancelTransfer" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancel Transfer</button>
+        </div>
+
+        <!-- View File Details -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">View File Details</h2>
+            <input id="viewFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <button id="getFile" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Get File Details</button>
+            <div id="fileDetails" class="mt-2 text-gray-700"></div>
+        </div>
+
+        <!-- View Version Details -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">View Version Details</h2>
+            <input id="versionViewFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <input id="versionNumber" type="number" placeholder="Version Number" class="border p-2 w-full mb-2">
+            <button id="getVersion" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Get Version Details</button>
+            <div id="versionDetails" class="mt-2 text-gray-700"></div>
+        </div>
+
+        <!-- View User's Files -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">View User's Files</h2>
+            <input id="userAddress" type="text" placeholder="User Address" class="border p-2 w-full mb-2">
+            <button id="getUserFiles" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Get User's Files</button>
+            <div id="userFiles" class="mt-2 text-gray-700"></div>
+        </div>
+
+        <!-- View Collaborators -->
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <h2 class="text-xl font-semibold mb-2">View Collaborators</h2>
+            <input id="collabViewFileId" type="number" placeholder="File ID" class="border p-2 w-full mb-2">
+            <button id="getCollaborators" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Get Collaborators</button>
+            <div id="collaboratorsList" class="mt-2 text-gray-700"></div>
+        </div>
+    </div>
+
+    <script>
+        // Contract details
+        const contractAddress = "0x61290207053274C840bb75E6298b79A0849c2763";
+        const contractABI = [
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"collaborator","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"}],"name":"CollaboratorAdded","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"collaborator","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"}],"name":"CollaboratorLeft","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"collaborator","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"}],"name":"CollaboratorRemoved","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"},{"indexed":false,"internalType":"string","name":"fileName","type":"string"}],"name":"FileCreated","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name Announcing":"currentOwner","type":"address"},{"indexed":true,"internalType":"address","name":"requestedOwner","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"}],"name":"OwnershipTransferRequested","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"}],"name":"OwnershipTransferred","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"fileId","type":"uint256"},{"indexed":true,"internalType":"uint256","name":"version","type":"uint256"},{"indexed":false,"internalType":"string","name":"commitMessage","type":"string"}],"name":"VersionAdded","type":"event"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"}],"name":"acceptOwnershipTransfer","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"},{"internalType":"address","name":"_collaborator","type":"address"}],"name":"addCollaborator","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"},{"internalType":"string","name":"_hash","type":"string"},{"internalType":"string","name":"_commitMessage","type":"string"},{"internalType":"uint256","name":"_fileSize","type":"uint256"}],"name":"addVersion","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"}],"name":"cancelOwnershipTransfer","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_fileName","type":"string"},{"internalType":"string","name":"_hash","type":"string"},{"internalType":"string","name":"_commitMessage","type":"string"},{"internalType":"uint256","name":"_fileSize","type":"uint256"}],"name":"createFile","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[],"name":"fileId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"}],"name":"getCollaborators","outputs":[{"internalType":"address[]","name":"","type":"address[]"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"}],"name":"getFile","outputs":[{"internalType":"string","name":"fileName","type":"string"},{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"latestVersion","type":"uint256"},{"internalType":"address","name":"pendingOwner","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"getFilecount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"getUserFiles","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"},{"internalType":"uint256","name":"_version","type":"uint256"}],"name":"getVersion","outputs":[{"internalType":"string","name":"hash","type":"string"},{"internalType":"string","name":"commitMessage","type":"string"},{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"uint256","name":"fileSize","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"}],"name":"leaveAsCollaborator","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"},{"internalType":"address","name":"_collaborator","type":"address"}],"name":"removeCollaborator","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_fileId","type":"uint256"},{"internalType":"address","name":"_newOwner","type":"address"}],"name":"requestOwnershipTransfer","outputs":[],"stateMutability":"nonpayable","type":"function"}
+        ];
+
+        let web3;
+        let contract;
+        let account;
+
+        // Initialize Web3 and contract
+        async function initWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+                try {
+                    const networkId = await web3.eth.net.getId();
+                    if (networkId !== 11155111) { // Sepolia network ID
+                        alert("Please switch to the Sepolia testnet in MetaMask.");
+                    } else {
+                        updateFileCount();
+                    }
+                } catch (error) {
+                    console.error("Error checking network:", error);
+                }
+            } else {
+                alert("Please install MetaMask!");
+            }
+        }
+
+        // Update file count
+        async function updateFileCount() {
+            try {
+                const count = await contract.methods.getFilecount().call();
+                document.getElementById("fileCount").innerText = `(${count} files)`;
+            } catch (error) {
+                console.error("Error getting file count:", error);
+                document.getElementById("fileCount").innerText = "(Error loading count)";
+            }
+        }
+
+        // Connect Wallet
+        document.getElementById("connectWallet").onclick = async () => {
+            try {
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                const accounts = await web3.eth.getAccounts();
+                account = accounts[0];
+                document.getElementById("accountStatus").innerText = `Connected: ${account}`;
+            } catch (error) {
+                console.error("Error connecting wallet:", error);
+                alert("Failed to connect wallet.");
+            }
+        };
+
+        // Create File
+        document.getElementById("createFile").onclick = async () => {
+            const fileName = document.getElementById("fileName").value;
+            const fileHash = document.getElementById("fileHash").value;
+            const commitMessage = document.getElementById("commitMessage").value;
+            const fileSize = document.getElementById("fileSize").value;
+
+            if (!fileName || !fileHash || !commitMessage || !fileSize) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await contract.methods.createFile(fileName, fileHash, commitMessage, fileSize).send({ from: account });
+                alert("File created successfully!");
+                updateFileCount();
+            } catch (error) {
+                console.error("Error creating file:", error);
+                alert("Failed to create file.");
+            }
+        };
+
+        // Add Version
+        document.getElementById("addVersion").onclick = async () => {
+            const fileId = document.getElementById("versionFileId").value;
+            const hash = document.getElementById("versionHash").value;
+            const commitMessage = document.getElementById("versionCommitMessage").value;
+            const fileSize = document.getElementById("versionFileSize").value;
+
+            if (!fileId || !hash || !commitMessage || !fileSize) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await contract.methods.addVersion(fileId, hash, commitMessage, fileSize).send({ from: account });
+                alert("Version added successfully!");
+            } catch (error) {
+                console.error("Error adding version:", error);
+                alert("Failed to add version.");
+            }
+        };
+
+        // Add Collaborator
+        document.getElementById("addCollaborator").onclick = async () => {
+            const fileId = document.getElementById("collabFileId").value;
+            const collaborator = document.getElementById("collaboratorAddress").value;
+
+            if (!fileId || !collaborator) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await contract.methods.addCollaborator(fileId, collaborator).send({ from: account });
+                alert("Collaborator added successfully!");
+            } catch (error) {
+                console.error("Error adding collaborator:", error);
+                alert("Failed to add collaborator.");
+            }
+        };
+
+        // Remove Collaborator
+        document.getElementById("removeCollaborator").onclick = async () => {
+            const fileId = document.getElementById("collabFileId").value;
+            const collaborator = document.getElementById("collaboratorAddress").value;
+
+            if (!fileId || !collaborator) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await contract.methods.removeCollaborator(fileId, collaborator).send({ from: account });
+                alert("Collaborator removed successfully!");
+            } catch (error) {
+                console.error("Error removing collaborator:", error);
+                alert("Failed to remove collaborator.");
+            }
+        };
+
+        // Leave as Collaborator
+        document.getElementById("leaveCollaborator").onclick = async () => {
+            const fileId = document.getElementById("collabFileId").value;
+
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
+
+            try {
+                await contract.methods.leaveAsCollaborator(fileId).send({ from: account });
+                alert("Left as collaborator successfully!");
+            } catch (error) {
+                console.error("Error leaving as collaborator:", error);
+                alert("Failed to leave as collaborator.");
+            }
+        };
+
+        // Request Ownership Transfer
+        document.getElementById("requestTransfer").onclick = async () => {
+            const fileId = document.getElementById("transferFileId").value;
+            const newOwner = document.getElementById("newOwnerAddress").value;
+
+            if (!fileId || !newOwner) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await contract.methods.requestOwnershipTransfer(fileId, newOwner).send({ from: account });
+                alert("Ownership transfer requested!");
+            } catch (error) {
+                console.error("Error requesting transfer:", error);
+                alert("Failed to request transfer.");
+            }
+        };
+
+        // Accept Ownership Transfer
+        document.getElementById("acceptTransfer").onclick = async () => {
+            const fileId = document.getElementById("transferFileId").value;
+
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
+
+            try {
+                await contract.methods.acceptOwnershipTransfer(fileId).send({ from: account });
+                alert("Ownership transfer accepted!");
+            } catch (error) {
+                console.error("Error accepting transfer:", error);
+                alert("Failed to accept transfer.");
+            }
+        };
+
+        // Cancel Ownership Transfer
+        document.getElementById("cancelTransfer").onclick = async () => {
+            const fileId = document.getElementById("transferFileId").value;
+
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
+
+            try {
+                await contract.methods.cancelOwnershipTransfer(fileId).send({ from: account });
+                alert("Ownership transfer cancelled!");
+            } catch (error) {
+                console.error("Error cancelling transfer:", error);
+                alert("Failed to cancel transfer.");
+            }
+        };
+
+        // Get File Details
+        document.getElementById("getFile").onclick = async () => {
+            const fileId = document.getElementById("viewFileId").value;
+
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
+
+            try {
+                const file = await contract.methods.getFile(fileId).call();
+                document.getElementById("fileDetails").innerHTML = `
+                    <p><strong>File Name:</strong> ${file.fileName}</p>
+                    <p><strong>Owner:</strong> ${file.owner}</p>
+                    <p><strong>Latest Version:</strong> ${file.latestVersion}</p>
+                    <p><strong>Pending Owner:</strong> ${file.pendingOwner}</p>
+                `;
+            } catch (error) {
+                console.error("Error getting file details:", error);
+                alert("Failed to get file details.");
+            }
+        };
+
+        // Get Version Details
+        document.getElementById("getVersion").onclick = async () => {
+            const fileId = document.getElementById("versionViewFileId").value;
+            const version = document.getElementById("versionNumber").value;
+
+            if (!fileId || !version) {
+                alert("Please enter File ID and Version Number.");
+                return;
+            }
+
+            try {
+                const versionData = await contract.methods.getVersion(fileId, version).call();
+                document.getElementById("versionDetails").innerHTML = `
+                    <p><strong>IPFS Hash:</strong> ${versionData.hash}</p>
+                    <p><strong>Commit Message:</strong> ${versionData.commitMessage}</p>
+                    <p><strong>Timestamp:</strong> ${new Date(versionData.timestamp * 1000).toLocaleString()}</p>
+                    <p><strong>File Size:</strong> ${versionData.fileSize} bytes</p>
+                `;
+            } catch (error) {
+                console.error("Error getting version details:", error);
+                alert("Failed to get version details.");
+            }
+        };
+
+        // Get User's Files
+        document.getElementById("getUserFiles").onclick = async () => {
+            const userAddress = document.getElementById("userAddress").value;
+
+            if (!userAddress) {
+                alert("Please enter User Address.");
+                return;
+            }
+
+            try {
+                const files = await contract.methods.getUserFiles(userAddress).call();
+                document.getElementById("userFiles").innerHTML = `
+                    <p><strong>User's File IDs:</strong> ${files.join(", ")}</p>
+                `;
+            } catch (error) {
+                console.error("Error getting user files:", error);
+                alert("Failed to get user files.");
+            }
+        };
+
+        // Get Collaborators
+        document.getElementById("getCollaborators").onclick = async () => {
+            const fileId = document.getElementById("collabViewFileId").value;
+
+            if (!fileId) {
+                alert("Please enter File ID.");
+                return;
+            }
+
+            try {
+                const collaborators = await contract.methods.getCollaborators(fileId).call();
+                document.getElementById("collaboratorsList").innerHTML = `
+                    <p><strong>Collaborators:</strong> ${collaborators.join(", ")}</p>
+                `;
+            } catch (error) {
+                console.error("Error getting collaborators:", error);
+                alert("Failed to get collaborators.");
+            }
+        };
+
+        // Initialize Web3 on page load
+        window.addEventListener("load", initWeb3);
+    </script>
+</body>
+</html>
